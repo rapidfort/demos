@@ -16,6 +16,9 @@ jobs:
         run:   curl  https://frontrow.rapidfort.com/cli/ | bash
 
       - name: Login to RF platform
+        env:
+          RF_ACCESS_ID: ${{ secrets.RF_ACCESS_ID }}
+          RF_SECRET_ACCESS_KEY: ${{ secrets.RF_SECRET_ACCESS_KEY }}
         run: rflogin
 
       - name: Pull Redis image
