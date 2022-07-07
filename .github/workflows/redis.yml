@@ -1,0 +1,63 @@
+name: Redis Demo
+
+on:
+  schedule:
+  - cron: '0 5 * * *'
+  workflow_dispatch:
+
+permissions: read-all
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: actions-cicd
+    steps:
+      - name: Install rapidfort tools
+        run:   curl  https://frontrow.rapidfort.com/cli/ | bash
+
+      - name: Login to RF platform
+        run: rflogin
+
+      - name: Pull Redis image
+        run: docker pull redis
+
+      - name: List docker images
+        run: docker images
+
+      - name: Stub Redis image
+        run: rfstub redis
+
+      - name: List docker images
+        run: docker images
+
+      - name: Run stub image
+        run: docker run --rm -d -p 6379:6379 --cap-add=SYS_PTRACE --name redis-stub redis:latest-rfstub
+
+      - name: Run coverage script
+        run: |
+          curl https://raw.githubusercontent.com/rapidfort/community-images/main/community_images/common/tests/test.redis > test.redis
+          docker cp test.redis redis-stub:/tmp/test.redis
+          docker exec -it redis-stub /bin/bash -c "cat /tmp/test.redis | redis-cli --pipe"
+
+      - name: Stop stub image
+        run: docker stop redis-stub
+
+      - name: Harden redis image
+        run: rfharder redis:latest-rfstub
+
+      - name: List docker images
+        run: docker images
+
+      - name: Run hardened image
+        run: docker run --rm -d -p 6379:6379 --cap-add=SYS_PTRACE --name redis-hardened redis:latest-rfhardened
+
+      - name: Run script on hardened image
+        run: |
+          docker cp test.redis redis-hardened:/tmp/test.redis
+          docker exec -it redis-hardened /bin/bash -c "cat /tmp/test.redis | redis-cli --pipe"
+
+      - name: Stop hardened image
+        run: docker stop redis-hardened
+
+      - name: List docker images
+        run: docker images
