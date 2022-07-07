@@ -40,7 +40,7 @@ jobs:
         run: |
           curl https://raw.githubusercontent.com/rapidfort/community-images/main/community_images/common/tests/test.redis > test.redis
           docker cp test.redis redis-stub:/tmp/test.redis
-          docker exec -it redis-stub /bin/bash -c "cat /tmp/test.redis | redis-cli --pipe"
+          docker exec -i redis-stub /bin/bash -c "cat /tmp/test.redis | redis-cli --pipe"
 
       - name: Stop stub image
         run: docker stop redis-stub
@@ -57,7 +57,7 @@ jobs:
       - name: Run script on hardened image
         run: |
           docker cp test.redis redis-hardened:/tmp/test.redis
-          docker exec -it redis-hardened /bin/bash -c "cat /tmp/test.redis | redis-cli --pipe"
+          docker exec -i redis-hardened /bin/bash -c "cat /tmp/test.redis | redis-cli --pipe"
 
       - name: Stop hardened image
         run: docker stop redis-hardened
