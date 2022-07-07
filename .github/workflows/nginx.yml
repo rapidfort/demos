@@ -28,7 +28,9 @@ jobs:
         run: rfstub nginx:latest
 
       - name: run the stub. add the SYS_PTRACE capability so that RapidFort can trace the runtime behavior
-        run: docker run --rm -d -p9999:80 --name=my-rf-test --cap-add=SYS_PTRACE nginx:latest-rfstub
+        run: |
+          docker run --rm -d -p9999:80 --name=my-rf-test --cap-add=SYS_PTRACE nginx:latest-rfstub
+          sleep 15
 
       - name: run some tests to exercise the application. you can also point your browser to localhost:9999
         run: curl localhost:9999
@@ -43,7 +45,10 @@ jobs:
         run: docker images | grep nginx
 
       - name: run the hardened image and test it again
-        run: docker run --rm -it -p9999:80 nginx:latest-rfhardened
+        run: |
+          docker run --rm -d -p9999:80 nginx:latest-rfhardened
+          sleep 15
+          curl localhost:9999
 
       - name: for more information, please view the Getting Started documentation
         run: echo "https://docs.rapidfort.com/getting-started/docker"
