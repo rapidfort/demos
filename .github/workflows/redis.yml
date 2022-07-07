@@ -25,13 +25,13 @@ jobs:
         run: docker pull redis
 
       - name: List docker images
-        run: docker images
+        run: docker images | grep redis
 
       - name: Stub Redis image
         run: rfstub redis
 
       - name: List docker images
-        run: docker images
+        run: docker images | grep redis
 
       - name: Run stub image
         run: docker run --rm -d -p 6379:6379 --cap-add=SYS_PTRACE --name redis-stub redis:latest-rfstub
@@ -49,7 +49,7 @@ jobs:
         run: rfharden redis:latest-rfstub
 
       - name: List docker images
-        run: docker images
+        run: docker images | grep redis
 
       - name: Run hardened image
         run: docker run --rm -d -p 6379:6379 --cap-add=SYS_PTRACE --name redis-hardened redis:latest-rfhardened
@@ -63,4 +63,4 @@ jobs:
         run: docker stop redis-hardened
 
       - name: List docker images
-        run: docker images
+        run: docker images | grep redis
