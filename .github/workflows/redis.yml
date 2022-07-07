@@ -12,55 +12,44 @@ jobs:
     runs-on: ubuntu-latest
     environment: actions-cicd
     steps:
-      - name: Install rapidfort tools
+      - name: install the RapidFort CLI tools
         run:   curl  https://frontrow.rapidfort.com/cli/ | bash
 
-      - name: Login to RF platform
+      - name: authenticate
         env:
           RF_ACCESS_ID: ${{ secrets.RF_ACCESS_ID }}
           RF_SECRET_ACCESS_KEY: ${{ secrets.RF_SECRET_ACCESS_KEY }}
         run: rflogin
 
-      - name: Pull Redis image
-        run: docker pull redis
+      - name: pull the latest Redis image
+        run: docker pull redis:latest
 
-      - name: List docker images
-        run: docker images | grep redis
+      - name: run rfstub to generate the stub. this creates a new image, redis:latest-rfstub
+        run: rfstub redis:latest
 
-      - name: Stub Redis image
-        run: rfstub redis
+      - name: run the stub. add the SYS_PTRACE capability so that RapidFort can trace the runtime behavior
+        run: docker run --rm -d -p 6379:6379 --cap-add=SYS_PTRACE --name my-rf-test redis:latest-rfstub
 
-      - name: List docker images
-        run: docker images | grep redis
-
-      - name: Run stub image
-        run: docker run --rm -d -p 6379:6379 --cap-add=SYS_PTRACE --name redis-stub redis:latest-rfstub
-
-      - name: Run coverage script
+      - name: run some tests to exercise the application. 
         run: |
           curl https://raw.githubusercontent.com/rapidfort/community-images/main/community_images/common/tests/test.redis > test.redis
-          docker cp test.redis redis-stub:/tmp/test.redis
-          docker exec -i redis-stub /bin/bash -c "cat /tmp/test.redis | redis-cli --pipe"
+          docker cp test.redis my-rf-test:/tmp/test.redis
+          docker exec -i my-rf-test /bin/bash -c "cat /tmp/test.redis | redis-cli --pipe"
 
-      - name: Stop stub image
-        run: docker stop redis-stub
+      - name: stop the container
+        run: docker stop my-rf-test
 
-      - name: Harden redis image
+      - name: run rfharden to optimize and secure the image. this creates a new image, redis:latest-rfhardened
         run: rfharden redis:latest-rfstub
 
-      - name: List docker images
+      - name: check out the various images we created
         run: docker images | grep redis
 
-      - name: Run hardened image
-        run: docker run --rm -d -p 6379:6379 --cap-add=SYS_PTRACE --name redis-hardened redis:latest-rfhardened
-
-      - name: Run script on hardened image
+      - name: run the hardened image and test it again
         run: |
+          docker run --rm -d -p 6379:6379 --cap-add=SYS_PTRACE --name redis-hardened redis:latest-rfhardened
           docker cp test.redis redis-hardened:/tmp/test.redis
           docker exec -i redis-hardened /bin/bash -c "cat /tmp/test.redis | redis-cli --pipe"
 
-      - name: Stop hardened image
-        run: docker stop redis-hardened
-
-      - name: List docker images
-        run: docker images | grep redis
+      - name: for more information, please view the Getting Started documentation
+        run: echo "https://docs.rapidfort.com/getting-started/docker"
