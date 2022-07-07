@@ -28,7 +28,9 @@ jobs:
         run: rfstub redis:latest
 
       - name: run the stub. add the SYS_PTRACE capability so that RapidFort can trace the runtime behavior
-        run: docker run --rm -d -p 6379:6379 --cap-add=SYS_PTRACE --name my-rf-test redis:latest-rfstub
+        run: |
+          docker run --rm -d -p 6379:6379 --cap-add=SYS_PTRACE --name my-rf-test redis:latest-rfstub
+          sleep 15
 
       - name: run some tests to exercise the application. 
         run: |
@@ -48,6 +50,7 @@ jobs:
       - name: run the hardened image and test it again
         run: |
           docker run --rm -d -p 6379:6379 --cap-add=SYS_PTRACE --name redis-hardened redis:latest-rfhardened
+          sleep 15
           docker cp test.redis redis-hardened:/tmp/test.redis
           docker exec -i redis-hardened /bin/bash -c "cat /tmp/test.redis | redis-cli --pipe"
 
