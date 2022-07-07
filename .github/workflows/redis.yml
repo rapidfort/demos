@@ -46,7 +46,7 @@ jobs:
         run: docker stop redis-stub
 
       - name: Harden redis image
-        run: rfharder redis:latest-rfstub
+        run: rfharden redis:latest-rfstub
 
       - name: List docker images
         run: docker images
