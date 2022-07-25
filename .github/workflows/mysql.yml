@@ -29,7 +29,7 @@ jobs:
 
       - name: run the stub. add the SYS_PTRACE capability so that RapidFort can trace the runtime behavior
         run: |
-          docker run -d --rm -eMYSQL_ROOT_PASSWORD=my_pass -p3306:3306 --cap-add=SYS_PTRACE mysql:latest-rfstub
+          docker run -d --rm -eMYSQL_ROOT_PASSWORD=my_pass -p3306:3306 --name my-rf-test --cap-add=SYS_PTRACE mysql:latest-rfstub
           sleep 15
 
       - name: run some tests to exercise the application. 
@@ -49,10 +49,10 @@ jobs:
 
       - name: run the hardened image and test it again
         run: |
-          docker run -d --rm -eMYSQL_ROOT_PASSWORD=my_pass -p3306:3306 mysql:latest-rfhardened
+          docker run -d --rm -eMYSQL_ROOT_PASSWORD=my_pass -p3306:3306 --name mysql-hardened mysql:latest-rfhardened
           sleep 15
-          docker cp test.my_sql my-rf-test:/tmp/test.my_sql
-          docker exec -i my-rf-test /bin/bash -c "mysql -h localhost -uroot -pmy_pass mysql < /tmp/test.my_sql"
+          docker cp test.my_sql mysql-hardened:/tmp/test.my_sql
+          docker exec -i mysql-hardened /bin/bash -c "mysql -h localhost -uroot -pmy_pass mysql < /tmp/test.my_sql"
 
       - name: for more information, please view the Getting Started documentation
         run: echo "https://docs.rapidfort.com/getting-started/docker"
