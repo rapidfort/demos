@@ -49,7 +49,7 @@ jobs:
 
       - name: run the hardened image and test it again
         run: |
-          docker run --rm -d -p 6379:6379 --cap-add=SYS_PTRACE --name redis-hardened redis:latest-rfhardened
+          docker run --rm -d -p 6379:6379 --name redis-hardened redis:latest-rfhardened
           sleep 15
           docker cp test.redis redis-hardened:/tmp/test.redis
           docker exec -i redis-hardened /bin/bash -c "cat /tmp/test.redis | redis-cli --pipe"

@@ -1,0 +1,58 @@
+name: Postgres Demo
+
+on:
+  schedule:
+  - cron: '0 5 * * *'
+  workflow_dispatch:
+
+permissions: read-all
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: actions-cicd
+    steps:
+      - name: install the RapidFort CLI tools
+        run:   curl  https://frontrow.rapidfort.com/cli/ | bash
+
+      - name: authenticate
+        env:
+          RF_ACCESS_ID: ${{ secrets.RF_ACCESS_ID }}
+          RF_SECRET_ACCESS_KEY: ${{ secrets.RF_SECRET_ACCESS_KEY }}
+        run: rflogin
+
+      - name: pull the latest Postgres image
+        run: docker pull postgres:latest
+
+      - name: run rfstub to generate the stub. this creates a new image, Postgres:latest-rfstub
+        run: rfstub postgres:latest
+
+      - name: run the stub. add the SYS_PTRACE capability so that RapidFort can trace the runtime behavior
+        run: |
+          docker run -it --rm -ePOSTGRES_PASSWORD=my_pass -p5432:5432 --cap-add=SYS_PTRACE postgres:latest-rfstub
+          sleep 15
+
+      - name: run some tests to exercise the application. 
+        run: |
+          curl https://raw.githubusercontent.com/rapidfort/community-images/main/community_images/common/tests/test.psql > test.psql
+          docker cp test.psql my-rf-test:/tmp/test.psql
+          docker exec -i my-rf-test /bin/bash -c "PGPASSWORD=my_pass psql -U postgres -d postgres -f /tmp/test.psql"
+
+      - name: stop the container
+        run: docker stop my-rf-test
+
+      - name: run rfharden to optimize and secure the image. this creates a new image, Postgres:latest-rfhardened
+        run: rfharden postgres:latest-rfstub
+
+      - name: check out the various images we created
+        run: docker images | grep postgres
+
+      - name: run the hardened image and test it again
+        run: |
+          docker run -it --rm -ePOSTGRES_PASSWORD=my_pass -p5432:5432 postgres:latest-rfhardened
+          sleep 15
+          docker cp test.psql my-rf-test:/tmp/test.psql
+          docker exec -i my-rf-test /bin/bash -c "PGPASSWORD=my_pass psql -U postgres -d postgres -f /tmp/test.psql"
+
+      - name: for more information, please view the Getting Started documentation
+        run: echo "https://docs.rapidfort.com/getting-started/docker"
