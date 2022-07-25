@@ -1,4 +1,4 @@
-name: Redis Demo
+name: Redis Ironbank Demo
 
 on:
   schedule:

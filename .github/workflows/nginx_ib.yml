@@ -35,7 +35,7 @@ jobs:
 
       - name: run the stub. add the SYS_PTRACE capability so that RapidFort can trace the runtime behavior
         run: |
-          docker run --rm -d -p9999:80 --name=my-rf-test --cap-add=SYS_PTRACE registry1.dso.mil/ironbank/opensource/nginx/nginx:latest-rfstub
+          docker run --rm -d -p9999:8080 --name=my-rf-test --cap-add=SYS_PTRACE registry1.dso.mil/ironbank/opensource/nginx/nginx:latest-rfstub
           sleep 15
 
       - name: run some tests to exercise the application. you can also point your browser to localhost:9999
@@ -52,7 +52,7 @@ jobs:
 
       - name: run the hardened image and test it again
         run: |
-          docker run --rm -d -p9999:80 registry1.dso.mil/ironbank/opensource/nginx/nginx:latest-rfhardened
+          docker run --rm -d -p9999:8080 registry1.dso.mil/ironbank/opensource/nginx/nginx:latest-rfhardened
           sleep 15
           curl localhost:9999
 
