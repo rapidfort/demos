@@ -1,4 +1,4 @@
-name: Apache httpd Demo
+name: httpd Demo
 
 on:
   schedule:
