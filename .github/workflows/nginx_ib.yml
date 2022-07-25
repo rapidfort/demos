@@ -23,8 +23,8 @@ jobs:
 
       - name: authenticate to docker
         env:
-          RF_ACCESS_ID: ${{ secrets.IB_DOCKER_USERNAME }}
-          RF_SECRET_ACCESS_KEY: ${{ secrets.IB_DOCKER_PASSWORD }}
+          IB_DOCKER_USERNAME: ${{ secrets.IB_DOCKER_USERNAME }}
+          IB_DOCKER_PASSWORD: ${{ secrets.IB_DOCKER_PASSWORD }}
         run: docker login registry1.dso.mil -u "${IB_DOCKER_USERNAME}" -p "${IB_DOCKER_PASSWORD}"
 
       - name: pull the latest NGINX image
