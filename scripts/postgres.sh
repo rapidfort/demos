@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -x
 echo "Postgres Demo"
 
 # pull the latest Postgres image

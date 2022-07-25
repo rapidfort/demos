@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -x
 echo "Redis Demo"
 
 # pull the latest Redis image

@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -x
 echo "Mysql Demo"
 
 # pull the latest Mysql image

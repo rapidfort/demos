@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -x
 echo "Nginx Demo"
 
 # pull the latest NGINX image

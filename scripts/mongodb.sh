@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -x
 echo "Mongo Demo"
 
 # pull the latest mongo image

@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -x
 echo "MariaDB Demo"
 
 # pull the latest mariadb image

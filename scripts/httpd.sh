@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -x
 echo "httpd Demo"
 
 # pull the latest httpd image
