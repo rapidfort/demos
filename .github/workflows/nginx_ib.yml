@@ -15,13 +15,16 @@ jobs:
       - name: install the RapidFort CLI tools
         run:   curl  https://frontrow.rapidfort.com/cli/ | bash
 
-      - name: authenticate
+      - name: authenticate to RapidFort
         env:
           RF_ACCESS_ID: ${{ secrets.RF_ACCESS_ID }}
           RF_SECRET_ACCESS_KEY: ${{ secrets.RF_SECRET_ACCESS_KEY }}
         run: rflogin
 
       - name: authenticate to docker
+        env:
+          RF_ACCESS_ID: ${{ secrets.IB_DOCKER_USERNAME }}
+          RF_SECRET_ACCESS_KEY: ${{ secrets.IB_DOCKER_PASSWORD }}
         run: docker login registry1.dso.mil -u "${IB_DOCKER_USERNAME}" -p "${IB_DOCKER_PASSWORD}"
 
       - name: pull the latest NGINX image
