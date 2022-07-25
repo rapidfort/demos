@@ -29,7 +29,7 @@ jobs:
 
       - name: run the stub. add the SYS_PTRACE capability so that RapidFort can trace the runtime behavior
         run: |
-          docker run -d --rm -eMONGODB_ROOT_PASSWORD=my_pass -p8081:8081 --name my-rf-test --cap-add=SYS_PTRACE mongo:latest-rfstub
+          docker run -d --rm -eMONGO_INITDB_ROOT_USERNAME=root -eMONGO_INITDB_ROOT_PASSWORD=my_pass -p8081:8081 --name my-rf-test --cap-add=SYS_PTRACE mongo:latest-rfstub
           sleep 15
 
       - name: run some tests to exercise the application. 
@@ -49,7 +49,7 @@ jobs:
 
       - name: run the hardened image and test it again
         run: |
-          docker run -d --rm -eMONGODB_ROOT_PASSWORD=my_pass -p8081:8081 --name mongo-hardened mongo:latest-rfhardened
+          docker run -d --rm -eMONGO_INITDB_ROOT_USERNAME=root -eMONGO_INITDB_ROOT_PASSWORD=my_pass -p8081:8081 --name mongo-hardened mongo:latest-rfhardened
           sleep 15
           docker cp test.mongo mongo-hardened:/tmp/test.mongo
           docker exec -i mongo-hardened /bin/bash -c "mongosh admin --authenticationDatabase admin -u root -p my_pass --file /tmp/test.mongo"
