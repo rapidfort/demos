@@ -24,7 +24,7 @@ docker stop my-rf-test
 rfharden mongo:latest-rfstub
 
 # check out the various images we created
-docker images grep mongo
+docker images | grep mongo
 
 # run the hardened image and test it again
 docker run -d --rm -eMONGO_INITDB_ROOT_USERNAME=root -eMONGO_INITDB_ROOT_PASSWORD=my_pass -p8081:8081 --name mongo-hardened mongo:latest-rfhardened

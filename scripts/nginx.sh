@@ -22,7 +22,7 @@ docker stop my-rf-test
 rfharden nginx:latest-rfstub
 
 # check out the various images we created
-docker images grep nginx
+docker images | grep nginx
 
 # run the hardened image and test it again
 docker run --rm -d -p9999:80 nginx:latest-rfhardened

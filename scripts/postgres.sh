@@ -24,7 +24,7 @@ docker stop my-rf-test
 rfharden postgres:latest-rfstub
 
 # check out the various images we created
-docker images grep postgres
+docker images | grep postgres
 
 # run the hardened image and test it again
 docker run -d --rm -ePOSTGRES_PASSWORD=my_pass -p5432:5432 --name posgres-hardened postgres:latest-rfhardened

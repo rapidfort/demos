@@ -24,7 +24,7 @@ docker stop my-rf-test
 rfharden mysql:latest-rfstub
 
 # check out the various images we created
-docker images grep mysql
+docker images | grep mysql
 
 # run the hardened image and test it again
 docker run -d --rm -eMYSQL_ROOT_PASSWORD=my_pass -p3306:3306 --name mysql-hardened mysql:latest-rfhardened
