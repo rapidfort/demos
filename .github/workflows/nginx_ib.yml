@@ -28,14 +28,14 @@ jobs:
         run: docker login registry1.dso.mil -u "${IB_DOCKER_USERNAME}" -p "${IB_DOCKER_PASSWORD}"
 
       - name: pull the latest NGINX image
-        run: docker pull registry1.dso.mil/ironbank/opensource/nginx:latest
+        run: docker pull registry1.dso.mil/ironbank/opensource/nginx/nginx:latest
 
       - name: run rfstub to generate the stub. this creates a new image, nginx:latest-rfstub
-        run: rfstub registry1.dso.mil/ironbank/opensource/nginx:latest
+        run: rfstub registry1.dso.mil/ironbank/opensource/nginx/nginx:latest
 
       - name: run the stub. add the SYS_PTRACE capability so that RapidFort can trace the runtime behavior
         run: |
-          docker run --rm -d -p9999:80 --name=my-rf-test --cap-add=SYS_PTRACE registry1.dso.mil/ironbank/opensource/nginx:latest-rfstub
+          docker run --rm -d -p9999:80 --name=my-rf-test --cap-add=SYS_PTRACE registry1.dso.mil/ironbank/opensource/nginx/nginx:latest-rfstub
           sleep 15
 
       - name: run some tests to exercise the application. you can also point your browser to localhost:9999
@@ -45,14 +45,14 @@ jobs:
         run: docker stop my-rf-test
 
       - name: run rfharden to optimize and secure the image. this creates a new image, nginx:latest-rfhardened
-        run: rfharden registry1.dso.mil/ironbank/opensource/nginx:latest-rfstub
+        run: rfharden registry1.dso.mil/ironbank/opensource/nginx/nginx:latest-rfstub
 
       - name: check out the various images we created
         run: docker images | grep nginx
 
       - name: run the hardened image and test it again
         run: |
-          docker run --rm -d -p9999:80 registry1.dso.mil/ironbank/opensource/nginx:latest-rfhardened
+          docker run --rm -d -p9999:80 registry1.dso.mil/ironbank/opensource/nginx/nginx:latest-rfhardened
           sleep 15
           curl localhost:9999
 
