@@ -1,0 +1,58 @@
+name: Mysql Demo
+
+on:
+  schedule:
+  - cron: '0 5 * * *'
+  workflow_dispatch:
+
+permissions: read-all
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: actions-cicd
+    steps:
+      - name: install the RapidFort CLI tools
+        run:   curl  https://frontrow.rapidfort.com/cli/ | bash
+
+      - name: authenticate
+        env:
+          RF_ACCESS_ID: ${{ secrets.RF_ACCESS_ID }}
+          RF_SECRET_ACCESS_KEY: ${{ secrets.RF_SECRET_ACCESS_KEY }}
+        run: rflogin
+
+      - name: pull the latest Mysql image
+        run: docker pull mysql:latest
+
+      - name: run rfstub to generate the stub. this creates a new image, Mysql:latest-rfstub
+        run: rfstub mysql:latest
+
+      - name: run the stub. add the SYS_PTRACE capability so that RapidFort can trace the runtime behavior
+        run: |
+          docker run -i --rm -eMYSQL_ROOT_PASSWORD=my_pass -p3306:3306 --cap-add=SYS_PTRACE mysql:latest-rfstub
+          sleep 15
+
+      - name: run some tests to exercise the application. 
+        run: |
+          curl https://raw.githubusercontent.com/rapidfort/community-images/main/community_images/common/tests/test.my_sql > test.my_sql
+          docker cp test.my_sql my-rf-test:/tmp/test.my_sql
+          docker exec -i my-rf-test /bin/bash -c "mysql -h localhost -uroot -pmy_pass mysql < /tmp/test.my_sql"
+
+      - name: stop the container
+        run: docker stop my-rf-test
+
+      - name: run rfharden to optimize and secure the image. this creates a new image, Mysql:latest-rfhardened
+        run: rfharden mysql:latest-rfstub
+
+      - name: check out the various images we created
+        run: docker images | grep mysql
+
+      - name: run the hardened image and test it again
+        run: |
+          docker run -i --rm -eMYSQL_ROOT_PASSWORD=my_pass -p3306:3306 mysql:latest-rfhardened
+          sleep 15
+          docker cp test.my_sql my-rf-test:/tmp/test.my_sql
+          docker exec -i my-rf-test /bin/bash -c "mysql -h localhost -uroot -pmy_pass mysql < /tmp/test.my_sql"
+
+      - name: for more information, please view the Getting Started documentation
+        run: echo "https://docs.rapidfort.com/getting-started/docker"

@@ -29,7 +29,7 @@ jobs:
 
       - name: run the stub. add the SYS_PTRACE capability so that RapidFort can trace the runtime behavior
         run: |
-          docker run -it --rm -ePOSTGRES_PASSWORD=my_pass -p5432:5432 --cap-add=SYS_PTRACE postgres:latest-rfstub
+          docker run -i --rm -ePOSTGRES_PASSWORD=my_pass -p5432:5432 --cap-add=SYS_PTRACE postgres:latest-rfstub
           sleep 15
 
       - name: run some tests to exercise the application. 
@@ -49,7 +49,7 @@ jobs:
 
       - name: run the hardened image and test it again
         run: |
-          docker run -it --rm -ePOSTGRES_PASSWORD=my_pass -p5432:5432 postgres:latest-rfhardened
+          docker run -i --rm -ePOSTGRES_PASSWORD=my_pass -p5432:5432 postgres:latest-rfhardened
           sleep 15
           docker cp test.psql my-rf-test:/tmp/test.psql
           docker exec -i my-rf-test /bin/bash -c "PGPASSWORD=my_pass psql -U postgres -d postgres -f /tmp/test.psql"
