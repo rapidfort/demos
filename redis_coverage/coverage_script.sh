@@ -49,12 +49,23 @@ test_no_tls()
     # get Redis passwordk
     REDIS_PASSWORD=$(kubectl get secret --namespace ${NAMESPACE} ${HELM_RELEASE} -o jsonpath="{.data.redis-password}" | base64 --decode)
 
-
     # copy test.redis into container
     kubectl -n ${NAMESPACE} cp test.redis ${HELM_RELEASE}-master-0:/tmp/test.redis
 
     # run script
     kubectl -n ${NAMESPACE} exec -i ${HELM_RELEASE}-master-0 -- /bin/bash -c "cat /tmp/test.redis | REDISCLI_AUTH=\"${REDIS_PASSWORD}\" redis-cli -h localhost --pipe"
+
+    # copy common_commands.sh into container
+    kubectl -n ${NAMESPACE} cp common_commands.sh ${HELM_RELEASE}-master-0:/tmp/common_commands.sh
+
+    # run script
+    kubectl -n ${NAMESPACE} exec -i ${HELM_RELEASE}-master-0 -- /tmp/common_commands.sh
+
+    # copy redis_coverage.sh into container
+    kubectl -n ${NAMESPACE} cp redis_coverage.sh ${HELM_RELEASE}-master-0:/tmp/redis_coverage.sh
+
+    # run script
+    kubectl -n ${NAMESPACE} exec -i ${HELM_RELEASE}-master-0 -- /tmp/redis_coverage.sh
 
     # bring down helm install
     helm delete ${HELM_RELEASE} --namespace ${NAMESPACE}
@@ -70,6 +81,7 @@ test_tls()
     echo "Testing redis with TLS"
 
     # Install certs
+    kubectl apply -f cert_manager.yml
     kubectl --namespace ${NAMESPACE} apply -f tls_certs.yml
 
     #sleep 1 min
@@ -101,6 +113,7 @@ test_tls()
 
     # delete certs
     kubectl --namespace ${NAMESPACE} delete -f tls_certs.yml
+    kubectl delete -f cert_manager.yml
 
     # delete the PVC associated
     kubectl -n ${NAMESPACE} delete pvc --all
@@ -135,7 +148,7 @@ main()
     # harden image
     harden_image
 
-    #test hardened images
+    # test hardened images
     test_no_tls ${PUB_REPO}
     test_tls ${PUB_REPO}
 }
