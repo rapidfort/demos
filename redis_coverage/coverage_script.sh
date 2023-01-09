@@ -70,7 +70,7 @@ test_tls()
     echo "Testing redis with TLS"
 
     # Install certs
-    kubectl apply --namespace ${NAMESPACE} -f tls_certs.yml
+    kubectl apply -f tls_certs.yml
 
     #sleep 1 min
     echo "waiting for 1 min for setup"
@@ -100,7 +100,7 @@ test_tls()
     helm delete ${HELM_RELEASE} --namespace ${NAMESPACE}
 
     # delete certs
-    kubectl delete --namespace ${NAMESPACE} -f tls_certs.yml
+    kubectl delete -f tls_certs.yml
 
     # delete the PVC associated
     kubectl -n ${NAMESPACE} delete pvc --all
