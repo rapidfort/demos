@@ -11,7 +11,7 @@
 # redis commands in each configuration, invoke some errors, and run some commands to make sure they are included
 # in the hardened image.
 #
-# For more info on writing coverage scripts, please see https://bit.ly/rf-coverage-scripts
+# For more info on writing coverage scripts, please see https://bit.ly/coverage-scripts
 #
 
 set -x
