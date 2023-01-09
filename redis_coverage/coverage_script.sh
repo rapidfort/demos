@@ -79,7 +79,7 @@ test_tls()
     # Install redis
     helm install ${HELM_RELEASE} ${IREPO} --namespace ${NAMESPACE} \
         --set image.tag=${TAG} --set image.repository=${IMAGE_REPOSITORY} \
-        --set tls.enabled=true --set tls.existingSecret=localhost-server-tls \
+        --set tls.enabled=true --set tls.existingSecret=redis-tls \
         --set tls.certCAFilename=ca.crt --set tls.certFilename=tls.crt \
         --set tls.certKeyFilename=tls.key -f overrides.yml
 
