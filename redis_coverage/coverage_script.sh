@@ -56,22 +56,11 @@ test_no_tls()
     # run script
     kubectl -n ${NAMESPACE} exec -i ${HELM_RELEASE}-master-0 -- /bin/bash -c "cat /tmp/test.redis | REDISCLI_AUTH=\"${REDIS_PASSWORD}\" redis-cli -h localhost --pipe"
 
-    # sleep for 30 sec
-    echo "waiting for 30 sec"
-    sleep 30
-
     # bring down helm install
     helm delete ${HELM_RELEASE} --namespace ${NAMESPACE}
 
     # delete the PVC associated
-    kubectl -n ${NAMESPACE} delete pvc redis-data-${HELM_RELEASE}-master-0
-    kubectl -n ${NAMESPACE} delete pvc redis-data-${HELM_RELEASE}-replicas-0
-    kubectl -n ${NAMESPACE} delete pvc redis-data-${HELM_RELEASE}-replicas-1
-    kubectl -n ${NAMESPACE} delete pvc redis-data-${HELM_RELEASE}-replicas-2
-
-    # sleep for 30 sec
-    echo "waiting for 30 sec"
-    sleep 30
+    kubectl -n ${NAMESPACE} delete pvc --all
 }
 
 
@@ -107,10 +96,6 @@ test_tls()
     # run script
     kubectl -n ${NAMESPACE} exec -i ${HELM_RELEASE}-master-0 -- /bin/bash -c "cat /tmp/test.redis | REDISCLI_AUTH=\"${REDIS_PASSWORD}\" redis-cli -h localhost --tls --cert /opt/bitnami/redis/certs/tls.crt --key /opt/bitnami/redis/certs/tls.key --cacert /opt/bitnami/redis/certs/ca.crt --pipe"
 
-    # sleep for 30 sec
-    echo "waiting for 30 sec"
-    sleep 30
-
     # bring down helm install
     helm delete ${HELM_RELEASE} --namespace ${NAMESPACE}
 
@@ -118,14 +103,7 @@ test_tls()
     kubectl delete --namespace ${NAMESPACE} -f tls_certs.yml
 
     # delete the PVC associated
-    kubectl -n ${NAMESPACE} delete pvc redis-data-${HELM_RELEASE}-master-0
-    kubectl -n ${NAMESPACE} delete pvc redis-data-${HELM_RELEASE}-replicas-0
-    kubectl -n ${NAMESPACE} delete pvc redis-data-${HELM_RELEASE}-replicas-1
-    kubectl -n ${NAMESPACE} delete pvc redis-data-${HELM_RELEASE}-replicas-2
-
-    # sleep for 30 sec
-    echo "waiting for 30 sec"
-    sleep 30
+    kubectl -n ${NAMESPACE} delete pvc --all
 }
 
 harden_image()
