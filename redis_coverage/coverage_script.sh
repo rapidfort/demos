@@ -70,7 +70,7 @@ test_tls()
     echo "Testing redis with TLS"
 
     # Install certs
-    kubectl apply -f tls_certs.yml
+    kubectl --namespace ${NAMESPACE} apply -f tls_certs.yml
 
     #sleep 1 min
     echo "waiting for 1 min for setup"
@@ -79,7 +79,7 @@ test_tls()
     # Install redis
     helm install ${HELM_RELEASE} ${IREPO} --namespace ${NAMESPACE} \
         --set image.tag=${TAG} --set image.repository=${IMAGE_REPOSITORY} \
-        --set tls.enabled=true --set tls.existingSecret=redis-tls \
+        --set tls.enabled=true --set tls.existingSecret=localhost-server-tls \
         --set tls.certCAFilename=ca.crt --set tls.certFilename=tls.crt \
         --set tls.certKeyFilename=tls.key -f overrides.yml
 
@@ -100,7 +100,7 @@ test_tls()
     helm delete ${HELM_RELEASE} --namespace ${NAMESPACE}
 
     # delete certs
-    kubectl delete -f tls_certs.yml
+    kubectl --namespace ${NAMESPACE} delete -f tls_certs.yml
 
     # delete the PVC associated
     kubectl -n ${NAMESPACE} delete pvc --all
