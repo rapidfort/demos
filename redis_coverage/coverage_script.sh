@@ -42,15 +42,19 @@ test_no_tls()
     helm install ${HELM_RELEASE}  ${IREPO} --namespace ${NAMESPACE} \
         --set image.tag=${TAG} --set image.repository=${IMAGE_REPOSITORY} -f overrides.yml
 
-    # sleep for 3 min
-    echo "waiting for 3 min for setup"
-    sleep 3m
+    # waiting for pod to be ready
+    echo "waiting for pod to be ready"
+    kubectl wait pods ${HELM_RELEASE}-master-0 -n ${NAMESPACE} --for=condition=ready --timeout=10m
 
     # get Redis passwordk
     REDIS_PASSWORD=$(kubectl get secret --namespace ${NAMESPACE} ${HELM_RELEASE} -o jsonpath="{.data.redis-password}" | base64 --decode)
 
-    #exec into container
-    kubectl -n ${NAMESPACE} exec -it ${HELM_RELEASE}-master-0 -- /bin/bash -c "REDISCLI_AUTH=${REDIS_PASSWORD} redis-cli -h localhost EVAL \"return {KEYS[1],KEYS[2],ARGV[1],ARGV[2]}\" 2 key1 key2 first second"
+
+    # copy test.redis into container
+    kubectl -n ${NAMESPACE} cp test.redis ${HELM_RELEASE}-master-0:/tmp/test.redis
+
+    # run script
+    kubectl -n ${NAMESPACE} exec -i ${HELM_RELEASE}-master-0 -- /bin/bash -c "cat /tmp/test.redis | REDISCLI_AUTH=\"${REDIS_PASSWORD}\" redis-cli -h localhost --pipe"
 
     # sleep for 30 sec
     echo "waiting for 30 sec"
@@ -90,16 +94,18 @@ test_tls()
         --set tls.certCAFilename=ca.crt --set tls.certFilename=tls.crt \
         --set tls.certKeyFilename=tls.key -f overrides.yml
 
-    # sleep for 3 min
-    echo "waiting for 3 min for setup"
-    sleep 3m
+    # waiting for pod to be ready
+    echo "waiting for pod to be ready"
+    kubectl wait pods ${HELM_RELEASE}-master-0 -n ${NAMESPACE} --for=condition=ready --timeout=10m
 
     # get Redis passwordk
     REDIS_PASSWORD=$(kubectl get secret --namespace ${NAMESPACE} ${HELM_RELEASE} -o jsonpath="{.data.redis-password}" | base64 --decode)
 
-    #exec into container
-    kubectl -n ${NAMESPACE} exec -it ${HELM_RELEASE}-master-0 \
-        -- /bin/bash -c "REDISCLI_AUTH=\"${REDIS_PASSWORD}\" redis-cli -h localhost --tls --cert /opt/bitnami/redis/certs/tls.crt --key /opt/bitnami/redis/certs/tls.key --cacert /opt/bitnami/redis/certs/ca.crt EVAL \"return {KEYS[1],KEYS[2],ARGV[1],ARGV[2]}\" 2 key1 key2 first second"
+    # copy test.redis into container
+    kubectl -n ${NAMESPACE} cp test.redis ${HELM_RELEASE}-master-0:/tmp/test.redis
+
+    # run script
+    kubectl -n ${NAMESPACE} exec -i ${HELM_RELEASE}-master-0 -- /bin/bash -c "cat /tmp/test.redis | REDISCLI_AUTH=\"${REDIS_PASSWORD}\" redis-cli -h localhost --tls --cert /opt/bitnami/redis/certs/tls.crt --key /opt/bitnami/redis/certs/tls.key --cacert /opt/bitnami/redis/certs/ca.crt --pipe"
 
     # sleep for 30 sec
     echo "waiting for 30 sec"
