@@ -14,8 +14,8 @@ echo "Running image generation for $0 $1 $2"
 IREGISTRY=docker.io
 IREPO=bitnami/redis
 OACCOUNT=codervinod
-OREPO=${OACCOUNT}/redis-rfstub
 PUB_REPO=${OACCOUNT}/redis
+OREPO=${PUB_REPO}-rfstub
 HELM_RELEASE=redis-release
 
 
@@ -27,11 +27,10 @@ create_stub()
     rfstub ${IREGISTRY}/${IREPO}:${TAG}
 
     # Change tag to point to rapidfort docker account
-    docker tag ${IREGISTRY}/${IREPO}:${TAG}-rfstub ${OREPO}:${TAG}
+    docker tag ${IREGISTRY}/${IREPO}:${TAG}-rfstub ${OREPO}
 
     # Push stub to our dockerhub account
-    docker push ${OREPO}:${TAG}
-
+    docker push ${OREPO}
 }
 
 
@@ -78,7 +77,7 @@ test_tls()
     echo "Testing redis with TLS"
 
     # Install certs
-    kubectl apply -f tls_certs.yml
+    kubectl apply --namespace ${NAMESPACE} -f tls_certs.yml
 
     #sleep 1 min
     echo "waiting for 1 min for setup"
@@ -110,7 +109,7 @@ test_tls()
     helm delete ${HELM_RELEASE} --namespace ${NAMESPACE}
 
     # delete certs
-    kubectl delete -f tls_certs.yml
+    kubectl delete --namespace ${NAMESPACE} -f tls_certs.yml
 
     # delete the PVC associated
     kubectl -n ${NAMESPACE} delete pvc redis-data-${HELM_RELEASE}-master-0
@@ -140,10 +139,16 @@ harden_image()
 
 main()
 {
+    # create RF stub
     create_stub
-    #test with stub
+    # test with stub
+    # test non tls config
     test_no_tls ${OREPO}
+
+    # test TLS config
     test_tls ${OREPO}
+
+    # harden image
     harden_image
 
     #test hardened images
