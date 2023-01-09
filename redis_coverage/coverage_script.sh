@@ -44,13 +44,13 @@ create_stub()
     #
 
     # Pull docker image
-    docker pull ${IREGISTRY}/${IREPO}:${TAG}
+    docker pull ${IREGISTRY}/${IREPO}:"${TAG}"
 
     # Create stub for docker image
-    rfstub ${IREGISTRY}/${IREPO}:${TAG}
+    rfstub ${IREGISTRY}/${IREPO}:"${TAG}"
 
     # Change tag to point to rapidfort docker account
-    docker tag ${IREGISTRY}/${IREPO}:${TAG}-rfstub ${OREPO}
+    docker tag ${IREGISTRY}/${IREPO}:"${TAG}"-rfstub ${OREPO}
 
     # Push stub to our dockerhub account
     docker push ${OREPO}
@@ -69,39 +69,39 @@ test_no_tls()
 
     echo "Testing redis without TLS"
     # Install redis
-    helm install ${HELM_RELEASE}  ${IREPO} --namespace ${NAMESPACE} \
-        --set image.tag=${TAG} --set image.repository=${IMAGE_REPOSITORY} -f overrides.yml
+    helm install ${HELM_RELEASE}  ${IREPO} --namespace "${NAMESPACE}" \
+        --set image.tag="${TAG}" --set image.repository="${IMAGE_REPOSITORY}" -f overrides.yml
 
     # waiting for pod to be ready
     echo "waiting for pod to be ready"
-    kubectl wait pods ${HELM_RELEASE}-master-0 -n ${NAMESPACE} --for=condition=ready --timeout=10m
+    kubectl wait pods ${HELM_RELEASE}-master-0 -n "${NAMESPACE}" --for=condition=ready --timeout=10m
 
     # get Redis passwordk
-    REDIS_PASSWORD=$(kubectl get secret --namespace ${NAMESPACE} ${HELM_RELEASE} -o jsonpath="{.data.redis-password}" | base64 --decode)
+    REDIS_PASSWORD=$(kubectl get secret --namespace "${NAMESPACE}" ${HELM_RELEASE} -o jsonpath="{.data.redis-password}" | base64 --decode)
 
     # copy test.redis into container
-    kubectl -n ${NAMESPACE} cp test.redis ${HELM_RELEASE}-master-0:/tmp/test.redis
+    kubectl -n "${NAMESPACE}" cp test.redis ${HELM_RELEASE}-master-0:/tmp/test.redis
 
     # run script
-    kubectl -n ${NAMESPACE} exec -i ${HELM_RELEASE}-master-0 -- /bin/bash -c "cat /tmp/test.redis | REDISCLI_AUTH=\"${REDIS_PASSWORD}\" redis-cli -h localhost --pipe"
+    kubectl -n "${NAMESPACE}" exec -i ${HELM_RELEASE}-master-0 -- /bin/bash -c "cat /tmp/test.redis | REDISCLI_AUTH=\"${REDIS_PASSWORD}\" redis-cli -h localhost --pipe"
 
     # copy common_commands.sh into container
-    kubectl -n ${NAMESPACE} cp common_commands.sh ${HELM_RELEASE}-master-0:/tmp/common_commands.sh
+    kubectl -n "${NAMESPACE}" cp common_commands.sh ${HELM_RELEASE}-master-0:/tmp/common_commands.sh
 
     # run script
-    kubectl -n ${NAMESPACE} exec -i ${HELM_RELEASE}-master-0 -- /tmp/common_commands.sh
+    kubectl -n "${NAMESPACE}" exec -i ${HELM_RELEASE}-master-0 -- /tmp/common_commands.sh
 
     # copy redis_coverage.sh into container
-    kubectl -n ${NAMESPACE} cp redis_coverage.sh ${HELM_RELEASE}-master-0:/tmp/redis_coverage.sh
+    kubectl -n "${NAMESPACE}" cp redis_coverage.sh ${HELM_RELEASE}-master-0:/tmp/redis_coverage.sh
 
     # run script
-    kubectl -n ${NAMESPACE} exec -i ${HELM_RELEASE}-master-0 -- /tmp/redis_coverage.sh
+    kubectl -n "${NAMESPACE}" exec -i ${HELM_RELEASE}-master-0 -- /tmp/redis_coverage.sh
 
     # bring down helm install
-    helm delete ${HELM_RELEASE} --namespace ${NAMESPACE}
+    helm delete ${HELM_RELEASE} --namespace "${NAMESPACE}"
 
     # delete the PVC associated
-    kubectl -n ${NAMESPACE} delete pvc --all
+    kubectl -n "${NAMESPACE}" delete pvc --all
 }
 
 
@@ -118,41 +118,41 @@ test_tls()
 
     # Install certs
     kubectl apply -f cert_manager.yml
-    kubectl --namespace ${NAMESPACE} apply -f tls_certs.yml
+    kubectl --namespace "${NAMESPACE}" apply -f tls_certs.yml
 
     #sleep 1 min
     echo "waiting for 1 min for setup"
     sleep 1m
 
     # Install redis
-    helm install ${HELM_RELEASE} ${IREPO} --namespace ${NAMESPACE} \
-        --set image.tag=${TAG} --set image.repository=${IMAGE_REPOSITORY} \
+    helm install ${HELM_RELEASE} ${IREPO} --namespace "${NAMESPACE}" \
+        --set image.tag="${TAG}" --set image.repository="${IMAGE_REPOSITORY}" \
         --set tls.enabled=true --set tls.existingSecret=localhost-server-tls \
         --set tls.certCAFilename=ca.crt --set tls.certFilename=tls.crt \
         --set tls.certKeyFilename=tls.key -f overrides.yml
 
     # waiting for pod to be ready
     echo "waiting for pod to be ready"
-    kubectl wait pods ${HELM_RELEASE}-master-0 -n ${NAMESPACE} --for=condition=ready --timeout=10m
+    kubectl wait pods ${HELM_RELEASE}-master-0 -n "${NAMESPACE}" --for=condition=ready --timeout=10m
 
     # get Redis passwordk
-    REDIS_PASSWORD=$(kubectl get secret --namespace ${NAMESPACE} ${HELM_RELEASE} -o jsonpath="{.data.redis-password}" | base64 --decode)
+    REDIS_PASSWORD=$(kubectl get secret --namespace "${NAMESPACE}" ${HELM_RELEASE} -o jsonpath="{.data.redis-password}" | base64 --decode)
 
     # copy test.redis into container
-    kubectl -n ${NAMESPACE} cp test.redis ${HELM_RELEASE}-master-0:/tmp/test.redis
+    kubectl -n "${NAMESPACE}" cp test.redis ${HELM_RELEASE}-master-0:/tmp/test.redis
 
     # run script
-    kubectl -n ${NAMESPACE} exec -i ${HELM_RELEASE}-master-0 -- /bin/bash -c "cat /tmp/test.redis | REDISCLI_AUTH=\"${REDIS_PASSWORD}\" redis-cli -h localhost --tls --cert /opt/bitnami/redis/certs/tls.crt --key /opt/bitnami/redis/certs/tls.key --cacert /opt/bitnami/redis/certs/ca.crt --pipe"
+    kubectl -n "${NAMESPACE}" exec -i ${HELM_RELEASE}-master-0 -- /bin/bash -c "cat /tmp/test.redis | REDISCLI_AUTH=\"${REDIS_PASSWORD}\" redis-cli -h localhost --tls --cert /opt/bitnami/redis/certs/tls.crt --key /opt/bitnami/redis/certs/tls.key --cacert /opt/bitnami/redis/certs/ca.crt --pipe"
 
     # bring down helm install
-    helm delete ${HELM_RELEASE} --namespace ${NAMESPACE}
+    helm delete ${HELM_RELEASE} --namespace "${NAMESPACE}"
 
     # delete certs
-    kubectl --namespace ${NAMESPACE} delete -f tls_certs.yml
+    kubectl --namespace "${NAMESPACE}" delete -f tls_certs.yml
     kubectl delete -f cert_manager.yml
 
     # delete the PVC associated
-    kubectl -n ${NAMESPACE} delete pvc --all
+    kubectl -n "${NAMESPACE}" delete pvc --all
 }
 
 harden_image()
@@ -162,13 +162,13 @@ harden_image()
     # Create the hardened image and push it to the output repo
 
     # Create the hardened image
-    rfharden ${IREGISTRY}/${IREPO}:${TAG}-rfstub
+    rfharden ${IREGISTRY}/${IREPO}:"${TAG}"-rfstub
 
     # Change tag to point to output docker account
-    docker tag ${IREGISTRY}/${IREPO}:${TAG}-rfhardened ${PUB_REPO}:${TAG}
+    docker tag ${IREGISTRY}/${IREPO}:"${TAG}"-rfhardened ${PUB_REPO}:"${TAG}"
 
     # Push stub to output dockerhub account
-    docker push ${PUB_REPO}:${TAG}
+    docker push ${PUB_REPO}:"${TAG}"
 
     echo "Hardened images pushed to ${PUB_REPO}:${TAG}"
 }
