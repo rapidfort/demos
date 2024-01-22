@@ -23,6 +23,7 @@ jobs:
 
       - name: authenticate
         env:
+          RF_ROOT_URL: https://mo.rapidfort.com
           RF_ACCESS_ID: ${{ secrets.RF_ACCESS_ID }}
           RF_SECRET_ACCESS_KEY: ${{ secrets.RF_SECRET_ACCESS_KEY }}
         run: rflogin
