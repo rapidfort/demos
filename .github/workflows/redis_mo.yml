@@ -18,6 +18,7 @@ jobs:
           cd rapidfort_cli
           curl https://mo.rapidfort.com/cli/rapidfort_cli-$(curl https://mo.rapidfort.com/cli/VERSION).tar.gz -o rapidfort_cli-$(curl https://mo.rapidfort.com/cli/VERSION).tar.gz
           tar -xzpvf rapidfort_cli-$(curl https://mo.rapidfort.com/cli/VERSION).tar.gz
+          ls -al .rapidfort_RtmF
           echo "PATH=$PATH:$(pwd)" >> $GITHUB_ENV
           cd -
 
