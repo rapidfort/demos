@@ -26,6 +26,11 @@ jobs:
           sudo tar -xzpvf rapidfort_cli-$(curl https://mo.rapidfort.com/cli/VERSION).tar.gz
           ls -al tools/.rapidfort_RtmF || true
           echo "PATH=$PATH:$(pwd)" >> $GITHUB_ENV
+          docker pull alpine:latest
+          sudo ./rfscan alpine:latest
+          sudo ./rfstub alpine:latest
+          sudo ./rfharden alpine:latest-rfstub
+          echo $SHELL
           cd -
 
       - name: authenticate
