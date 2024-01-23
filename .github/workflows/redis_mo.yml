@@ -36,9 +36,9 @@ jobs:
         run: |
           rflogin
           docker pull alpine:latest
-          sudo ./rfscan alpine:latest
-          sudo ./rfstub alpine:latest
-          sudo ./rfharden alpine:latest-rfstub
+          sudo ./rapidfort_cli/rfscan alpine:latest
+          sudo ./rapidfort_cli/rfstub alpine:latest
+          sudo ./rapidfort_cli/rfharden alpine:latest-rfstub
 
       - name: pull the latest Redis image
         run: docker pull redis:latest
