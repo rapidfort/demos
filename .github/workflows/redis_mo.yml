@@ -55,7 +55,7 @@ jobs:
       - name: run the stub. add the SYS_PTRACE capability so that RapidFort can trace the runtime behavior
         run: |
           # docker run --rm -i --entrypoint= -e LD_LIBRARY_PATH=/.rapidfort_RtmF/ redis:latest-rfstub /.rapidfort_RtmF/ls -al .rapidfort_RtmF/exec.universal
-          docker run --rm -i -p 6379:6379 --cap-add=SYS_PTRACE --name my-rf-test redis:latest-rfstub
+          docker run --rm -d -p 6379:6379 --cap-add=SYS_PTRACE --name my-rf-test redis:latest-rfstub
           sleep 15
 
       - name: run some tests to exercise the application.
