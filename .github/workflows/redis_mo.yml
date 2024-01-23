@@ -23,13 +23,8 @@ jobs:
           mkdir -p rapidfort_cli
           cd rapidfort_cli
           curl https://mo.rapidfort.com/cli/rapidfort_cli-$(curl https://mo.rapidfort.com/cli/VERSION).tar.gz -o rapidfort_cli-$(curl https://mo.rapidfort.com/cli/VERSION).tar.gz
-          sudo tar -xzpvf rapidfort_cli-$(curl https://mo.rapidfort.com/cli/VERSION).tar.gz
-          ls -al tools/.rapidfort_RtmF || true
+          sudo tar -xzpf rapidfort_cli-$(curl https://mo.rapidfort.com/cli/VERSION).tar.gz
           echo "PATH=$PATH:$(pwd)" >> $GITHUB_ENV
-          docker pull alpine:latest
-          sudo ./rfscan alpine:latest
-          sudo ./rfstub alpine:latest
-          sudo ./rfharden alpine:latest-rfstub
           echo $SHELL
           cd -
 
@@ -38,7 +33,12 @@ jobs:
           RF_ROOT_URL: https://mo.rapidfort.com
           RF_ACCESS_ID: ${{ secrets.RF_ACCESS_ID }}
           RF_SECRET_ACCESS_KEY: ${{ secrets.RF_SECRET_ACCESS_KEY }}
-        run: rflogin
+        run: |
+          rflogin
+          docker pull alpine:latest
+          sudo ./rfscan alpine:latest
+          sudo ./rfstub alpine:latest
+          sudo ./rfharden alpine:latest-rfstub
 
       - name: pull the latest Redis image
         run: docker pull redis:latest
