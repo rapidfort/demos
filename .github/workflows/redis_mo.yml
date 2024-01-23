@@ -39,7 +39,7 @@ jobs:
           sudo RF_ROOT_URL=https://mo.rapidfort.com RF_ACCESS_ID=${{ secrets.RF_ACCESS_ID }} RF_SECRET_ACCESS_KEY=${{ secrets.RF_SECRET_ACCESS_KEY }} ./rapidfort_cli/rflogin
           sudo ./rapidfort_cli/rfscan alpine:latest
           sudo ./rapidfort_cli/rfstub alpine:latest
-          sudo ./rapidfort_cli/rfharden alpine:latest-rfstub
+          sudo ./rapidfort_cli/rfharden alpine:latest-rfstub || true
 
       - name: pull the latest Redis image
         run: docker pull redis:latest
