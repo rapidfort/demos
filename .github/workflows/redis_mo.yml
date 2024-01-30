@@ -1,15 +1,13 @@
 name: Redis Mo Demo
 
 on:
-  schedule:
-  - cron: '0 5 * * *'
   workflow_dispatch:
 
 permissions: read-all
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: rajeevt-gh-runner-1
     environment: mo-cicd
     steps:
       - name: Login to Docker Hub
@@ -22,63 +20,62 @@ jobs:
         run: |
           mkdir -p rapidfort_cli
           cd rapidfort_cli
-          curl https://mo.rapidfort.com/cli/rapidfort_cli-$(curl https://mo.rapidfort.com/cli/VERSION).tar.gz -o rapidfort_cli-$(curl https://mo.rapidfort.com/cli/VERSION).tar.gz
-          sudo tar -xzpf rapidfort_cli-$(curl https://mo.rapidfort.com/cli/VERSION).tar.gz
-          echo "PATH=$PATH:$(pwd)" >> $GITHUB_ENV
+          curl -k https://10.0.0.172/cli > rfcli
+  
           echo $SHELL
           cd -
 
-      - name: authenticate
-        env:
-          RF_ROOT_URL: https://mo.rapidfort.com
-          RF_ACCESS_ID: ${{ secrets.RF_ACCESS_ID }}
-          RF_SECRET_ACCESS_KEY: ${{ secrets.RF_SECRET_ACCESS_KEY }}
-        run: |
-          rflogin
-          docker pull alpine:latest
-          sudo RF_ROOT_URL=https://mo.rapidfort.com RF_ACCESS_ID=${{ secrets.RF_ACCESS_ID }} RF_SECRET_ACCESS_KEY=${{ secrets.RF_SECRET_ACCESS_KEY }} ./rapidfort_cli/rflogin
-          sudo ./rapidfort_cli/rfscan alpine:latest
-          sudo ./rapidfort_cli/rfstub alpine:latest
-          sudo ./rapidfort_cli/rfharden alpine:latest-rfstub || true
-
-      - name: pull the latest Redis image
-        run: docker pull redis:latest
-
-      - name: run rfstub to generate the stub. this creates a new image, redis:latest-rfstub
-        run: rfstub redis:latest
-
-      # - name: push rfstub image
+      # - name: authenticate
+      #   env:
+      #     RF_ROOT_URL: https://mo.rapidfort.com
+      #     RF_ACCESS_ID: ${{ secrets.RF_ACCESS_ID }}
+      #     RF_SECRET_ACCESS_KEY: ${{ secrets.RF_SECRET_ACCESS_KEY }}
       #   run: |
-      #     docker tag redis:latest-rfstub rfsupport/redis:latest-rfstub
-      #     docker push rfsupport/redis:latest-rfstub
+      #     rflogin
+      #     docker pull alpine:latest
+      #     sudo RF_ROOT_URL=https://mo.rapidfort.com RF_ACCESS_ID=${{ secrets.RF_ACCESS_ID }} RF_SECRET_ACCESS_KEY=${{ secrets.RF_SECRET_ACCESS_KEY }} ./rapidfort_cli/rflogin
+      #     sudo ./rapidfort_cli/rfscan alpine:latest
+      #     sudo ./rapidfort_cli/rfstub alpine:latest
+      #     sudo ./rapidfort_cli/rfharden alpine:latest-rfstub || true
 
-      - name: run the stub. add the SYS_PTRACE capability so that RapidFort can trace the runtime behavior
-        run: |
-          # docker run --rm -i --entrypoint= -e LD_LIBRARY_PATH=/.rapidfort_RtmF/ redis:latest-rfstub /.rapidfort_RtmF/ls -al .rapidfort_RtmF/exec.universal
-          docker run --rm -d -p 6379:6379 --cap-add=SYS_PTRACE --name my-rf-test redis:latest-rfstub
-          sleep 15
+      # - name: pull the latest Redis image
+      #   run: docker pull redis:latest
 
-      - name: run some tests to exercise the application.
-        run: |
-          curl https://raw.githubusercontent.com/rapidfort/community-images/main/community_images/common/tests/test.redis > test.redis
-          docker cp test.redis my-rf-test:/tmp/test.redis
-          docker exec -i my-rf-test /bin/bash -c "cat /tmp/test.redis | redis-cli --pipe"
+      # - name: run rfstub to generate the stub. this creates a new image, redis:latest-rfstub
+      #   run: rfstub redis:latest
 
-      - name: stop the container
-        run: docker stop my-rf-test
+      # # - name: push rfstub image
+      # #   run: |
+      # #     docker tag redis:latest-rfstub rfsupport/redis:latest-rfstub
+      # #     docker push rfsupport/redis:latest-rfstub
 
-      - name: run rfharden to optimize and secure the image. this creates a new image, redis:latest-rfhardened
-        run: rfharden redis:latest-rfstub
+      # - name: run the stub. add the SYS_PTRACE capability so that RapidFort can trace the runtime behavior
+      #   run: |
+      #     # docker run --rm -i --entrypoint= -e LD_LIBRARY_PATH=/.rapidfort_RtmF/ redis:latest-rfstub /.rapidfort_RtmF/ls -al .rapidfort_RtmF/exec.universal
+      #     docker run --rm -d -p 6379:6379 --cap-add=SYS_PTRACE --name my-rf-test redis:latest-rfstub
+      #     sleep 15
 
-      - name: check out the various images we created
-        run: docker images | grep redis
+      # - name: run some tests to exercise the application.
+      #   run: |
+      #     curl https://raw.githubusercontent.com/rapidfort/community-images/main/community_images/common/tests/test.redis > test.redis
+      #     docker cp test.redis my-rf-test:/tmp/test.redis
+      #     docker exec -i my-rf-test /bin/bash -c "cat /tmp/test.redis | redis-cli --pipe"
 
-      - name: run the hardened image and test it again
-        run: |
-          docker run --rm -d -p 6379:6379 --name redis-hardened redis:latest-rfhardened
-          sleep 15
-          docker cp test.redis redis-hardened:/tmp/test.redis
-          docker exec -i redis-hardened /bin/bash -c "cat /tmp/test.redis | redis-cli --pipe"
+      # - name: stop the container
+      #   run: docker stop my-rf-test
 
-      - name: for more information, please view the Getting Started documentation
-        run: echo "https://docs.rapidfort.com/getting-started/docker"
+      # - name: run rfharden to optimize and secure the image. this creates a new image, redis:latest-rfhardened
+      #   run: rfharden redis:latest-rfstub
+
+      # - name: check out the various images we created
+      #   run: docker images | grep redis
+
+      # - name: run the hardened image and test it again
+      #   run: |
+      #     docker run --rm -d -p 6379:6379 --name redis-hardened redis:latest-rfhardened
+      #     sleep 15
+      #     docker cp test.redis redis-hardened:/tmp/test.redis
+      #     docker exec -i redis-hardened /bin/bash -c "cat /tmp/test.redis | redis-cli --pipe"
+
+      # - name: for more information, please view the Getting Started documentation
+      #   run: echo "https://docs.rapidfort.com/getting-started/docker"
