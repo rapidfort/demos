@@ -18,9 +18,7 @@ jobs:
 
       - name: install the RapidFort CLI tools
         run: |
-          mkdir -p rapidfort_cli
-          cd rapidfort_cli
-          curl -k https://10.0.0.172/cli > rfcli
+          curl -k https://mo.rapidfort.com/cli > rfcli
           sudo bash rfcli -p /usr/local/bin/rfcli
           rm rfcli
           echo "/usr/local/bin/rfcli" >> $GITHUB_PATH
@@ -28,9 +26,9 @@ jobs:
 
       - name: authenticate
         env:
-          RF_ROOT_URL: https://10.0.0.172
-          RF_ACCESS_ID: RFc191f69d60ff4060a0
-          RF_SECRET_ACCESS_KEY: faa8f2a87ec64098870914e08418cc65418bbf68
+          RF_ROOT_URL: https://mo.rapidfort.com
+          RF_ACCESS_ID: ${{ secrets.RF_ACCESS_ID }}
+          RF_SECRET_ACCESS_KEY: ${{ secrets.RF_SECRET_ACCESS_KEY }}
         run: |
           rflogin
 
