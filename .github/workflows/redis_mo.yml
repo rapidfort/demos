@@ -35,11 +35,6 @@ jobs:
           RF_SECRET_ACCESS_KEY: ${{ secrets.RF_SECRET_ACCESS_KEY }}
         run: |
           rflogin
-          docker pull alpine:latest
-          sudo RF_ROOT_URL=https://mo.rapidfort.com RF_ACCESS_ID=${{ secrets.RF_ACCESS_ID }} RF_SECRET_ACCESS_KEY=${{ secrets.RF_SECRET_ACCESS_KEY }} ./rapidfort_cli/rflogin
-          sudo ./rapidfort_cli/rfscan alpine:latest
-          sudo ./rapidfort_cli/rfstub alpine:latest
-          sudo ./rapidfort_cli/rfharden alpine:latest-rfstub || true
 
       - name: pull the latest Redis image
         run: docker pull redis:latest
@@ -47,14 +42,9 @@ jobs:
       - name: run rfstub to generate the stub. this creates a new image, redis:latest-rfstub
         run: rfstub redis:latest
 
-      # - name: push rfstub image
-      #   run: |
-      #     docker tag redis:latest-rfstub rfsupport/redis:latest-rfstub
-      #     docker push rfsupport/redis:latest-rfstub
-
+  
       - name: run the stub. add the SYS_PTRACE capability so that RapidFort can trace the runtime behavior
         run: |
-          # docker run --rm -i --entrypoint= -e LD_LIBRARY_PATH=/.rapidfort_RtmF/ redis:latest-rfstub /.rapidfort_RtmF/ls -al .rapidfort_RtmF/exec.universal
           docker run --rm -d -p 6379:6379 --cap-add=SYS_PTRACE --name my-rf-test redis:latest-rfstub
           sleep 15
 
