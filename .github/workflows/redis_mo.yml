@@ -22,9 +22,9 @@ jobs:
         run: |
           mkdir -p rapidfort_cli
           cd rapidfort_cli
-          curl https://mo.rapidfort.com/cli/rapidfort_cli-$(curl https://mo.rapidfort.com/cli/VERSION).tar.gz -o rapidfort_cli-$(curl https://mo.rapidfort.com/cli/VERSION).tar.gz
-          sudo tar -xzpf rapidfort_cli-$(curl https://mo.rapidfort.com/cli/VERSION).tar.gz
-          echo "PATH=$PATH:$(pwd)" >> $GITHUB_ENV
+          curl https://mo.rapidfort.com/cli -o rf.sh
+          sudo bash rf.sh
+          echo "PATH=$PATH:/usr/local/bin/rapidfort" >> $GITHUB_ENV
           echo $SHELL
           cd -
 
