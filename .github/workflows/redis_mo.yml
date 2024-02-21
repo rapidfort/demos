@@ -22,17 +22,17 @@ jobs:
         run: |
           mkdir -p rapidfort_cli
           cd rapidfort_cli
-          curl https://mo.rapidfort.com/cli -o rf.sh
-          sudo bash rf.sh
+          curl https://us01.rapidfort.com/cli -o rf.sh
+          sudo bash rf.sh -p /usr/local/bin/rapidfort
           echo "PATH=$PATH:/usr/local/bin/rapidfort" >> $GITHUB_ENV
           echo $SHELL
           cd -
 
       - name: authenticate
         env:
-          RF_ROOT_URL: https://mo.rapidfort.com
-          RF_ACCESS_ID: ${{ secrets.RF_ACCESS_ID }}
-          RF_SECRET_ACCESS_KEY: ${{ secrets.RF_SECRET_ACCESS_KEY }}
+          RF_ROOT_URL: https://us01.rapidfort.com
+          RF_ACCESS_ID: RFc75b50f319474eb59c
+          RF_SECRET_ACCESS_KEY: f18847b5f6374356a18de1f0d29b10c54f7ca2a7
         run: |
           rflogin
 
