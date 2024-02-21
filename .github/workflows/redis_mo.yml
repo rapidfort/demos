@@ -31,8 +31,8 @@ jobs:
       - name: authenticate
         env:
           RF_ROOT_URL: https://us01.rapidfort.com
-          RF_ACCESS_ID: RFc75b50f319474eb59c
-          RF_SECRET_ACCESS_KEY: f18847b5f6374356a18de1f0d29b10c54f7ca2a7
+          RF_ACCESS_ID: ${{ secrets.RF_ACCESS_ID }}
+          RF_SECRET_ACCESS_KEY: ${{ secrets.RF_SECRET_ACCESS_KEY }}
         run: |
           rflogin
 
